@@ -1,4 +1,4 @@
-/*CWM HPC Part B Assignment: Monte Carlo Method for calculate pi value on GPU
+/*CWM HPC Part B Assignment: Monte Carlo Method for calculating pi value on GPU
 2021/5/58 Jianhao Yuan */
 // reference: https://blog.csdn.net/ichocolatekapa/article/details/18960223
 
@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
-#include <cuda_runtime.h>
-#include <cuda_runtime_api.h>
 //curand for random points generate
 #include <curand.h>
 #include <curand_kernel.h>
@@ -17,11 +15,10 @@
 #define MAX_COUNT   2000000
 
 //Kernel
-__global__ void get_pi(float *res,int *count, int *time){
+__global__ void get_pi(float *res,int *count){
    //declare variables: 
-   //initial # points in 1/4 circle; total number of random point generated: n;
-   //time for running time test: t; loop index:i 
-   int a=0, index_x = threadIdx.x, n = *count, t = *time, i;
+   //initial # points in 1/4 circle; total number of random point generated: n; loop index:i 
+   int a=0, index_x = threadIdx.x, n = *count,i;
 
    // declare coordinate variables x,y
    float x, y;
@@ -53,33 +50,27 @@ int main(void){
     // declare variables: host pi value, device pi value, actual pi value, error between
     float *h_pi, *d_pi, pi, err;
 
-    //count/time (both host&device);loop index needed
-    int maxThread = MAX_THREAD, *h_count, *d_count, *h_time, *d_time, i;
+    //count(both host&device);loop index needed
+    int maxThread = MAX_THREAD, *h_count, *d_count, i;
 
     //allocate memory for host
     h_pi = (float *)malloc(sizeof(float) * maxThread);
     h_count = (int *)malloc(sizeof(int) * 1);
-    h_time = (int *)malloc(sizeof(int) * 1);
 
     //allocate memory for device
    cudaMalloc((void **)&d_pi, sizeof(float) * maxThread);
    cudaMalloc((void **)&d_count, sizeof(int) * 1);
-   cudaMalloc((void **)&d_time, sizeof(int) * 1);
 
-   //initialize count/time on host
+
+   //initialize count number on host
    h_count[0] = MAX_COUNT;
-   h_time[0] = (int)time(NULL);
 
-   //get count&time value to device
+
+   //get count value to device
    cudaMemcpy(d_count, h_count, sizeof(int) * 1, cudaMemcpyHostToDevice);
-   cudaMemcpy(d_time, h_time, sizeof(int) * 1, cudaMemcpyHostToDevice);
-
-   //running time test:start
-   clock_t start, end;
-   start = clock();
 
    //execute kernel
-   get_pi<<<1, maxThread>>> (d_pi, d_count, d_time);
+   get_pi<<<1, maxThread>>> (d_pi, d_count);
 
    //get pi value back to host
    cudaMemcpy(h_pi, d_pi, sizeof(float) * maxThread,cudaMemcpyDeviceToHost);
@@ -87,9 +78,6 @@ int main(void){
    //average over 512 threads
    for (i = 0; i < maxThread; i++) pi += h_pi[i];
    pi = pi / maxThread;
-
-   //running time test:start
-   end = clock();
 
    //Find error
    err = pi - (float)M_PI;
@@ -99,18 +87,19 @@ int main(void){
 
    //print output
    printf("Points: %d, Generated π: %f, Error: %.0fe-6\n",h_count[0] * maxThread, pi, err * 1000000);
-   printf("Timer: %f sec\n", (float)(end -start)/CLOCKS_PER_SEC);
 
    //free memory on host
    free(h_pi);
    free(h_count);
-   free(h_time);
 
    //free memory on device
    cudaFree(d_pi);
    cudaFree(d_count);
-   cudaFree(d_time);
 
    //end
    return 0;
+}
+
+       __syncthreads();
+    }
 }
