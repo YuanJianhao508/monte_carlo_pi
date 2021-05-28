@@ -48,7 +48,7 @@ __global__ void get_pi(float *res,int *count){
 
 int main(void){
     // declare variables: host pi value, device pi value, actual pi value, error between
-    float *h_pi, *d_pi, pi, err;
+    float *h_pi, *d_pi, pi=0, err;
 
     //count(both host&device);loop index needed
     int maxThread = MAX_THREAD, *h_count, *d_count, i;

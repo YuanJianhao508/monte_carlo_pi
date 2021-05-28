@@ -9,4 +9,4 @@
 module purge
 module load gpu/cuda
 
-./monte_carlo_pi.cu
+./monte_carlo_pi

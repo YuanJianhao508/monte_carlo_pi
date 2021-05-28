@@ -1,5 +1,5 @@
 INC := -I${CUDA_HOME}/include
-LIB := -L${CUDA_HOME}/lib64 -lcudart -lcuda
+LIB := -L${CUDA_HOME}/lib64 -lcudart -lcuda -lcurand
 
 GCC = g++
 NVCC = ${CUDA_HOME}/bin/nvcc
