@@ -28,7 +28,7 @@ __global__ void get_pi(float *res,int *count){
 
    //use curand to get random points
    curandState s;
-   curand_init(t, index_x, 0, &s);
+   curand_init(42, index_x, 0, &s);
    for (i = 1; i <= n; i++) {
        //random generate in 1*1 square
        x = curand_uniform(&s);
@@ -98,8 +98,4 @@ int main(void){
 
    //end
    return 0;
-}
-
-       __syncthreads();
-    }
 }
